@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>STARFUXXIA | Moda & Accesorios</title>
+
+<style>
+:root{
+  --pink:#e96f9d;
+  --pink2:#ffb7d2;
+  --dark:#211b20;
+  --cream:#fff8fb;
+  --line:#f0d7e2;
+  --green:#25d366;
+}
+
+*{box-sizing:border-box}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  color:var(--dark);
+  background:#fff;
+}
+
+a{
+  text-decoration:none;
+  color:inherit;
+}
+
+button,input{
+  font:inherit;
+}
+
+/* BARRA SUPERIOR */
+.top{
+  background:#211b20;
+  color:#fff;
+  text-align:center;
+  padding:8px;
+  font-size:12px;
+  letter-spacing:.5px;
+}
+
+/* NAV */
+header{
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+
+.nav{
+  max-width:1200px;
+  margin:auto;
+  padding:16px 24px;
+  display:flex;
+  align-items:center;
+  gap:25px;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:900;
+  font-size:22px;
+  letter-spacing:1px;
+  color:var(--pink);
+}
+
+.logo-mark{
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  background:linear-gradient(135deg,#fff,#ffb1d0);
+  display:grid;
+  place-items:center;
+  color:#fff;
+  box-shadow:0 5px 18px #e96f9d55;
+}
+
+.links{
+  display:flex;
+  gap:20px;
+  margin-left:auto;
+  font-size:14px;
+  font-weight:700;
+}
+
+.links a:hover{
+  color:var(--pink);
+}
+
+.search{
+  position:relative;
+}
+
+.search input{
+  width:190px;
+  border:1px solid var(--line);
+  border-radius:25px;
+  padding:10px 14px 10px 38px;
+  outline:none;
+}
+
+.search span{
+  position:absolute;
+  left:13px;
+  top:9px;
+}
+
+.cart{
+  border:0;
+  background:var(--pink);
+  color:#fff;
+  border-radius:25px;
+  padding:11px 16px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+/* PORTADA */
+.hero{
+  background:
+    radial-gradient(circle at 75% 20%,#ffd9e8,transparent 32%),
+    linear-gradient(120deg,#fff,#fff1f6);
+
+  min-height:530px;
+
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  align-items:center;
+}
+
+.hero-copy{
+  max-width:1200px;
+  margin:auto;
+  padding:70px 24px;
+}
+
+.eyebrow{
+  color:var(--pink);
+  font-weight:900;
+  letter-spacing:2px;
+  font-size:13px;
+}
+
+.hero h1{
+  font-size:clamp(46px,7vw,84px);
+  line-height:.95;
+  margin:15px 0;
+}
+
+.hero h1 span{
+  color:var(--pink);
+}
+
+.hero p{
+  max-width:500px;
+  color:#70666c;
+  font-size:18px;
+  line-height:1.6;
+}
+
+.cta{
+  display:inline-block;
+  background:var(--dark);
+  color:#fff;
+  padding:14px 22px;
+  border-radius:30px;
+  font-weight:800;
+  margin-top:12px;
+}
+
+.hero-art{
+  height:100%;
+  min-height:450px;
+  display:grid;
+  place-items:center;
+  padding:35px;
+}
+
+.hero-card{
+  width:min(390px,90%);
+  height:410px;
+  border-radius:35px;
+
+  background:
+    linear-gradient(145deg,#fff,#ffd5e5);
+
+  box-shadow:0 25px 60px #c95a8730;
+
+  display:grid;
+  place-items:center;
+  font-size:130px;
+}
+
+/* CONTENIDO */
+main{
+  max-width:1200px;
+  margin:auto;
+  padding:60px 24px;
+}
+
+.section-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:25px;
+}
+
+.section-head h2{
+  font-size:32px;
+  margin:0;
+}
+
+.section-head p{
+  color:#80757b;
+}
+
+/* CATEGORÍAS */
+.categories{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:35px;
+}
+
+.cat{
+  border:1px solid var(--line);
+  background:#fff;
+  padding:10px 16px;
+  border-radius:25px;
+  cursor:pointer;
+}
+
+.cat.active,
+.cat:hover{
+  background:#ffe3ee;
+  border-color:#ffc3d7;
+  color:#b83769;
+  font-weight:800;
+}
+
+/* PRODUCTOS */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:20px;
+}
+
+.product{
+  border:1px solid var(--line);
+  border-radius:22px;
+  overflow:hidden;
+  background:#fff;
+  transition:.2s;
+}
+
+.product:hover{
+  transform:translateY(-4px);
+  box-shadow:0 15px 35px #5a20320d;
+}
+
+.pic{
+  height:270px;
+  background:#fff0f6;
+  overflow:hidden;
+}
+
+.pic img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.info{
+  padding:16px;
+}
+
+.info h3{
+  margin:0 0 6px;
+  font-size:17px;
+}
+
+.meta{
+  font-size:12px;
+  color:#93878d;
+}
+
+.specs{
+  margin:12px 0 14px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+  font-size:12px;
+  line-height:1.55;
+  color:#756970;
+}
+
+.specs b{
+  color:var(--dark);
+}
+
+.spec-title{
+  display:block;
+  color:var(--pink);
+  font-weight:900;
+  margin-bottom:5px;
+  font-size:13px;
+}
+
+.specs span{
+  display:block;
+}
+
+.price{
+  font-weight:900;
+  font-size:20px;
+  color:var(--pink);
+  margin:11px 0;
+}
+
+.add{
+  width:100%;
+  border:0;
+  background:#211b20;
+  color:#fff;
+  padding:12px;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.add:hover{
+  background:var(--pink);
+}
+
+/* INFORMACIÓN */
+.features{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin-top:55px;
+}
+
+.feature{
+  background:var(--cream);
+  padding:24px;
+  border:1px solid var(--line);
+  border-radius:20px;
+}
+
+.feature b{
+  display:block;
+  margin-bottom:6px;
+}
+
+.feature span{
+  color:#776c72;
+  font-size:14px;
+}
+
+/* FOOTER */
+footer{
+  background:#211b20;
+  color:#fff;
+  padding:45px 24px;
+}
+
+.footer-in{
+  max-width:1200px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  flex-wrap:wrap;
+}
+
+.footer-logo{
+  font-weight:900;
+  color:#ffb2ce;
+  font-size:22px;
+}
+
+.footer-in p{
+  color:#c9c0c5;
+  font-size:14px;
+}
+
+/* WHATSAPP */
+.wa{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  z-index:25;
+
+  background:var(--green);
+  color:#fff;
+
+  padding:14px 19px;
+  border-radius:50px;
+
+  font-weight:900;
+
+  box-shadow:0 12px 30px #25d36655;
+
+  display:flex;
+  gap:9px;
+  align-items:center;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .hero{
+    grid-template-columns:1fr;
+  }
+
+  .hero-art{
+    display:none;
+  }
+
+  .links{
+    display:none;
+  }
+
+  .features{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:550px){
+
+  .nav{
+    padding:12px 15px;
+    gap:10px;
+  }
+
+  .logo{
+    font-size:17px;
+  }
+
+  .logo-mark{
+    width:34px;
+    height:34px;
+  }
+
+  .search{
+    display:none;
+  }
+
+  .cart{
+    margin-left:auto;
+  }
+
+  .grid{
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .pic{
+    height:210px;
+  }
+
+  .info{
+    padding:12px;
+  }
+
+  .info h3{
+    font-size:14px;
+  }
+
+  .price{
+    font-size:17px;
+  }
+
+  main{
+    padding:45px 15px;
+  }
+
+  .hero-copy{
+    padding:55px 20px;
+  }
+
+  .hero h1{
+    font-size:54px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  ✨ Envíos y pedidos por WhatsApp · STARFUXXIA
+</div>
+
+<header>
+
+<nav class="nav">
+
+<a class="logo" href="#">
+  <span class="logo-mark">★</span>
+  STARFUXXIA
+</a>
+
+<div class="links">
+  <a href="#catalogo">Catálogo</a>
+  <a href="#nosotros">Nosotros</a>
+  <a href="#contacto">Contacto</a>
+</div>
+
+<div class="search">
+  <span>⌕</span>
+  <input
+    id="search"
+    type="search"
+    placeholder="Buscar..."
+    oninput="render()"
+  >
+</div>
+
+<button class="cart">
+  🛍️ Carrito
+  <span id="count">0</span>
+</button>
+
+</nav>
+
+</header>
+
+
+<section class="hero">
+
+<div class="hero-copy">
+
+<div class="eyebrow">
+  NUEVA COLECCIÓN
+</div>
+
+<h1>
+  Tu estilo.<br>
+  <span>Tu estrella.</span>
+</h1>
+
+<p>
+  Descubre nuestra selección de moda y prendas de playa
+  con diseños modernos, femeninos y llenos de estilo.
+</p>
+
+<a class="cta" href="#catalogo">
+  Comprar ahora →
+</a>
+
+</div>
+
+<div class="hero-art">
+  <div class="hero-card">
+    👙✨
+  </div>
+</div>
+
+</section>
+
+
+<main id="catalogo">
+
+<div class="section-head">
+
+<div>
+  <h2>Catálogo</h2>
+  <p>Descubre nuestra nueva colección</p>
+</div>
+
+</div>
+
+
+<div class="categories">
+
+<button class="cat active"
+onclick="setCat('Todos',this)">
+Todos
+</button>
+
+<button class="cat"
+onclick="setCat('Enterizos',this)">
+Enterizos
+</button>
+
+<button class="cat"
+onclick="setCat('Bikinis',this)">
+Bikinis
+</button>
+
+<button class="cat"
+onclick="setCat('Lycra',this)">
+Lycra
+</button>
+
+<button class="cat"
+onclick="setCat('Salidas de baño',this)">
+Salidas de baño
+</button>
+
+</div>
+
+
+<div class="grid" id="products"></div>
+
+
+<div class="features" id="nosotros">
+
+<div class="feature">
+<b>💗 Estilo STARFUXXIA</b>
+<span>
+Prendas seleccionadas para crear looks frescos,
+modernos y llenos de personalidad.
+</span>
+</div>
+
+<div class="feature">
+<b>🛍️ Compra fácil</b>
+<span>
+Agrega tus productos favoritos y envía tu pedido
+directamente por WhatsApp.
+</span>
+</div>
+
+<div class="feature">
+<b>💬 Atención personalizada</b>
+<span>
+Estamos disponibles para ayudarte a elegir
+la prenda ideal.
+</span>
+</div>
+
+</div>
+
+</main>
+
+
+<footer id="contacto">
+
+<div class="footer-in">
+
+<div>
+  <div class="footer-logo">
+    ★ STARFUXXIA
+  </div>
+
+  <p>
+    Moda & accesorios · Estilo que inspira
+  </p>
+</div>
+
+<div>
+  <p>WhatsApp</p>
+  <strong>+57 301 341 2415</strong>
+</div>
+
+<div>
+  <p>Web</p>
+  <strong>www.starfuxxia.co</strong>
+</div>
+
+</div>
+
+</footer>
+
+
+<a
+class="wa"
+href="https://wa.me/573013412415"
+target="_blank"
+rel="noopener"
+>
+💬 WhatsApp
+</a>
+
+
+<script>
+
+const products = [
+
+{
+ id:1,
+ name:"Enterizo Niña",
+ ref:"184",
+ cat:"Enterizos",
+ img:"imagenes/enterizo-nina.jpeg",
+ sizes:"6 a 16",
+ colors:"Azul · Rosa · Celeste",
+ desc:"Enterizo de manga larga con cremallera, confeccionado para brindar comodidad y libertad de movimiento."
+},
+
+{
+ id:2,
+ name:"Enterizo Junior",
+ ref:"181",
+ cat:"Enterizos",
+ img:"imagenes/enterizo-junior.jpeg",
+ sizes:"12 a 18",
+ colors:"Rosa · Lila/Menta · Fucsia",
+ desc:"Enterizo de manga larga con cordón en espalda. Una propuesta juvenil, fresca y versátil."
+},
+
+{
+ id:3,
+ name:"Buzo Lycra",
+ ref:"B014",
+ cat:"Lycra",
+ img:"imagenes/lycra-buzo-biker.jpeg",
+ sizes:"32 · 34 · 36 · 38",
+ colors:"Negro · Azul Oscuro · Azul Pastel · Azul Rey",
+ desc:"Buzo de lycra de manga larga, ideal para complementar diferentes looks de playa y actividades al aire libre."
+},
+
+{
+ id:4,
+ name:"Biker Lycra",
+ ref:"B011",
+ cat:"Lycra",
+ img:"imagenes/lycra-buzo-biker.jpeg",
+ sizes:"32 · 34 · 36 · 38",
+ colors:"Negro · Azul Oscuro · Azul Pastel · Azul Rey",
+ desc:"Biker de lycra con diseño cómodo y versátil, pensado para combinar fácilmente con diferentes prendas."
+},
+
+{
+ id:5,
+ name:"Bikini",
+ ref:"7144",
+ cat:"Bikinis",
+ img:"imagenes/bikini-7144.jpeg",
+ sizes:"32 · 34 · 36 · 38",
+ colors:"Rosado · Amarillo Pastel · Café/Marfil · Azul Oscuro/Marfil",
+ desc:"Enterizo básico en bloques de color con espalda alta en U, diseñado para un look elegante y moderno."
+},
+
+{
+ id:6,
+ name:"Bikini Strapless",
+ ref:"6046",
+ cat:"Bikinis",
+ img:"imagenes/bikini-strapless-salida.jpeg",
+ sizes:"32 · 34 · 36",
+ colors:"Rosa/Celeste Pastel · Celeste/Amarillo Pastel · Negro/Marfil",
+ desc:"Bikini strapless con copas y tiras removibles, acompañado de panty tipo tanga de pierna alta."
+},
+
+{
+ id:7,
+ name:"Salida Vestida",
+ ref:"60",
+ cat:"Salidas de baño",
+ img:"imagenes/bikini-strapless-salida.jpeg",
+ sizes:"S · M · L",
+ colors:"Azul Pastel · Marfil · Negro",
+ desc:"Vestido corto en malla con manga larga acampanada, perfecto para complementar tus días de playa con elegancia."
+},
+
+{
+ id:8,
+ name:"Enterizo Escote",
+ ref:"7156",
+ cat:"Enterizos",
+ img:"imagenes/enterizo-escote-7156.jpeg",
+ sizes:"32 · 34 · 36 · 38",
+ colors:"Petróleo/Amarillo · Azul/Fucsia · Negro",
+ desc:"Enterizo halter con copa removible y escote en V en pecho y espalda."
+}
+
+];
+
+
+let cat="Todos";
+
+
+function setCat(c,btn){
+
+ cat=c;
+
+ document
+ .querySelectorAll(".cat")
+ .forEach(x=>x.classList.remove("active"));
+
+ btn.classList.add("active");
+
+ render();
+
+}
+
+
+function render(){
+
+ const q=document
+ .getElementById("search")
+ .value
+ .toLowerCase()
+ .trim();
+
+ const list=products.filter(p=>
+
+   (cat==="Todos" || p.cat===cat)
+
+   &&
+
+   (
+     !q
+     ||
+     p.name.toLowerCase().includes(q)
+     ||
+     p.cat.toLowerCase().includes(q)
+     ||
+     p.ref.toLowerCase().includes(q)
+   )
+
+ );
+
+
+ document.getElementById("products").innerHTML=
+
+ list.length
+
+ ?
+
+ list.map(p=>`
+
+ <article class="product">
+
+   <div class="pic">
+
+     <img
+       src="${p.img}"
+       alt="${p.name}"
+       loading="lazy"
+     >
+
+   </div>
+
+
+   <div class="info">
+
+     <div class="meta">
+       ${p.cat} · Ref. ${p.ref}
+     </div>
+
+     <h3>
+       ${p.name}
+     </h3>
+
+
+     <div class="specs">
+
+       <span class="spec-title">
+         Detalles de la prenda
+       </span>
+
+       <span>
+         ${p.desc}
+       </span>
+
+       <span>
+         <b>Tallas:</b>
+         ${p.sizes}
+       </span>
+
+       <span>
+         <b>Colores:</b>
+         ${p.colors}
+       </span>
+
+     </div>
+
+
+     <div class="price">
+       Consultar precio
+     </div>
+
+
+     <button class="add"
+       onclick="consultar('${p.name}')">
+
+       Consultar por WhatsApp
+
+     </button>
+
+   </div>
+
+ </article>
+
+ `).join("")
+
+ :
+
+ '<div class="no-results">No encontramos productos con esa búsqueda.</div>';
+
+}
+
+
+function consultar(nombre){
+
+ const mensaje =
+ `Hola STARFUXXIA, estoy interesada/o en el producto: ${nombre}. Quisiera conocer su precio y disponibilidad.`;
+
+ const url =
+ `https://wa.me/573013412415?text=${encodeURIComponent(mensaje)}`;
+
+ window.open(url,"_blank");
+
+}
+
+
+document
+.getElementById("search")
+.addEventListener("input",render);
+
+
+render();
+
+</script>
+
+</body>
+</html>
