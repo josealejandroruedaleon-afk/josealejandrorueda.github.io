@@ -506,7 +506,104 @@ footer{
 </head>
 
 <body>
+<!-- Botones de Sesión -->
+<div style="text-align: right; margin: 20px 30px;">
+  <button onclick="iniciarSesionGoogle()" id="btn-google" style="background: linear-gradient(135deg, #4285F4, #34a853, #fbbc05, #ea4335); color: white; border: none; padding: 14px 28px; font-size: 17px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(66, 133, 244, 0.4); transition: all 0.3s ease;">
+    🔐 Iniciar sesión con Google
+  </button>
+  <button onclick="cerrarSesion()" id="btn-cerrar" style="display:none; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 50px; cursor: pointer; margin-left: 10px; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);">
+    🚪 Cerrar sesión
+  </button>
+  <span id="usuario-nombre" style="margin-left:15px; color:#333; font-weight:500;"></span>
+</div>
 
+<!-- Panel de Administrador -->
+<div id="admin-panel" style="display:none; max-width: 500px; margin: 30px auto; padding: 30px; background: linear-gradient(135deg, #f0b000, #ffcc00); border-radius: 16px; box-shadow: 0 8px 30px rgba(255, 196, 0, 0.4);">
+  <h2 style="text-align:center; color:#2d2d2d; margin-top:0;">⚙️ Agregar Producto</h2>
+  <input type="text" id="prod-nombre" placeholder="📦 Nombre del producto" style="width:100%; padding:12px; margin:8px 0; border:none; border-radius:8px; font-size:15px; box-sizing:border-box;">
+  <textarea id="prod-desc" placeholder="📝 Descripción" style="width:100%; padding:12px; margin:8px 0; border:none; border-radius:8px; font-size:15px; min-height:100px; box-sizing:border-box;"></textarea>
+  <input type="number" id="prod-precio" placeholder="💰 Precio" style="width:100%; padding:12px; margin:8px 0; border:none; border-radius:8px; font-size:15px; box-sizing:border-box;">
+  <button onclick="guardarProducto()" style="width:100%; background: linear-gradient(135deg, #27ae60, #2ecc71); color:white; border:none; padding:14px; font-size:17px; font-weight:bold; border-radius:8px; cursor:pointer; margin-top:10px; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);">
+    ✅ Guardar Producto
+  </button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIZaSyCC0lE9wTRbbfLXc3vsw6CFF7_MvtdIsz8",
+  authDomain: "starfuxxia-987dd.firebaseapp.com",
+  databaseURL: "https://starfuxxia-987dd-default-rtdb.firebaseio.com",
+  projectId: "starfuxxia-987dd",
+  storageBucket: "starfuxxia-987dd.firebasestorage.app",
+  messagingSenderId: "154113912493",
+  appId: "1:154113912493:web:9b0a46479c921ee0b1a024",
+  measurementId: "G-JK802DWYXL"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function iniciarSesionGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      mostrarUsuario(result.user);
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    });
+}
+
+function cerrarSesion() {
+  auth.signOut().then(() => {
+    document.getElementById('usuario-nombre').textContent = '';
+    document.getElementById('btn-google').style.display = 'block';
+    document.getElementById('btn-cerrar').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'none';
+  });
+}
+
+function mostrarUsuario(user) {
+  document.getElementById('usuario-nombre').textContent = user.email;
+  document.getElementById('btn-google').style.display = 'none';
+  document.getElementById('btn-cerrar').style.display = 'inline-block';
+  // 👇 CAMBIA ESTO POR TU CORREO REAL 👇
+  if (user.email === 'josealejandroruedaleon@gmail.com') {
+    document.getElementById('admin-panel').style.display = 'block';
+  }
+}
+
+function guardarProducto() {
+  const nombre = document.getElementById('prod-nombre').value;
+  const desc = document.getElementById('prod-desc').value;
+  const precio = document.getElementById('prod-precio').value;
+  
+  if (!nombre || !precio) { alert('Completa nombre y precio'); return; }
+  
+  db.collection('productos').add({
+    nombre: nombre,
+    descripcion: desc,
+    precio: parseFloat(precio),
+    fecha: new Date()
+  }).then(() => {
+    alert('✅ Producto guardado!');
+    document.getElementById('prod-nombre').value = '';
+    document.getElementById('prod-desc').value = '';
+    document.getElementById('prod-precio').value = '';
+  }).catch((error) => {
+    alert('Error: ' + error.message);
+  });
+}
+
+auth.onAuthStateChanged((user) => {
+  if (user) { mostrarUsuario(user); }
+});
+</script>
 <div class="top">
   ✨ Envíos y pedidos por WhatsApp · STARFUXXIA
 </div>
