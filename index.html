@@ -506,6 +506,456 @@ footer{
 </head>
 
 <body>
+
+<div class="top">
+  ✨ Envíos y pedidos por WhatsApp · STARFUXXIA
+</div>
+
+<header>
+
+<nav class="nav">
+
+<a class="logo" href="#">
+  <span class="logo-mark">★</span>
+  STARFUXXIA
+</a>
+
+<div class="links">
+  <a href="#catalogo">Catálogo</a>
+  <a href="#nosotros">Nosotros</a>
+  <a href="#contacto">Contacto</a>
+</div>
+
+<div class="search">
+  <span>⌕</span>
+  <input
+    id="search"
+    type="search"
+    placeholder="Buscar..."
+    oninput="render()"
+  >
+</div>
+
+<button class="cart">
+  🛍️ Carrito
+  <span id="count">0</span>
+</button>
+
+</nav>
+
+</header>
+
+
+<section class="hero">
+
+<div class="hero-copy">
+
+<div class="eyebrow">
+  NUEVA COLECCIÓN
+</div>
+
+<h1>
+  Tu estilo.<br>
+  <span>Tu estrella.</span>
+</h1>
+
+<p>
+  Descubre nuestra selección de moda y prendas de playa
+  con diseños modernos, femeninos y llenos de estilo.
+</p>
+
+<a class="cta" href="#catalogo">
+  Comprar ahora →
+</a>
+
+</div>
+
+<div class="hero-art">
+  <div class="hero-card">
+    👙✨
+  </div>
+</div>
+
+</section>
+
+
+<main id="catalogo">
+
+<div class="section-head">
+
+<div>
+  <h2>Catálogo</h2>
+  <p>Descubre nuestra nueva colección</p>
+</div>
+
+</div>
+
+
+<div class="categories">
+
+<button class="cat active"
+onclick="setCat('Todos',this)">
+Todos
+</button>
+
+<button class="cat"
+onclick="setCat('Enterizos',this)">
+Enterizos
+</button>
+
+<button class="cat"
+onclick="setCat('Bikinis',this)">
+Bikinis
+</button>
+
+<button class="cat"
+onclick="setCat('Lycra',this)">
+Lycra
+</button>
+
+<button class="cat"
+onclick="setCat('Salidas de baño',this)">
+Salidas de baño
+</button>
+
+</div>
+
+
+<div class="grid" id="products"></div>
+
+
+<div class="features" id="nosotros">
+
+<div class="feature">
+<b>💗 Estilo STARFUXXIA</b>
+<span>
+Prendas seleccionadas para crear looks frescos,
+modernos y llenos de personalidad.
+</span>
+</div>
+
+<div class="feature">
+<b>🛍️ Compra fácil</b>
+<span>
+Agrega tus productos favoritos y envía tu pedido
+directamente por WhatsApp.
+</span>
+</div>
+
+<div class="feature">
+<b>💬 Atención personalizada</b>
+<span>
+Estamos disponibles para ayudarte a elegir
+la prenda ideal.
+</span>
+</div>
+
+</div>
+
+</main>
+
+
+<footer id="contacto">
+
+<div class="footer-in">
+
+<div>
+  <div class="footer-logo">
+    ★ STARFUXXIA
+  </div>
+
+  <p>
+    Moda & accesorios · Estilo que inspira
+  </p>
+</div>
+
+<div>
+  <p>WhatsApp</p>
+  <strong>+57 301 341 2415</strong>
+</div>
+
+<div>
+  <p>Web</p>
+  <strong>www.starfuxxia.co</strong>
+</div>
+
+</div>
+
+</footer>
+
+
+<a
+class="wa"
+href="https://wa.me/573013412415"
+target="_blank"
+rel="noopener"
+>
+💬 WhatsApp
+</a>
+
+
+<script>
+
+const products = [
+
+{
+ id:1,
+ name:"Enterizo Niña",
+ ref:"184",
+ cat:"Enterizos",
+ img:"imagenes/enterizo-nina.jpeg",
+ sizes:"6 a 16",
+ colors:"Azul · Rosa · Celeste",
+ desc:"Enterizo de manga larga con cremallera, confeccionado para brindar comodidad y libertad de movimiento."
+},
+
+{
+ id:2,
+ name:"Enterizo Junior",
+ ref:"181",
+ cat:"Enterizos",
+ img:"imagenes/enterizo-junior.jpeg",
+ sizes:"12 a 18",
+ colors:"Rosa · Lila/Menta · Fucsia",
+ desc:"Enterizo de manga larga con cordón en espalda. Una propuesta juvenil, fresca y versátil."
+},
+
+{
+ id:3,
+ name:"Buzo Lycra",
+ ref:"B014",
+ cat:"Lycra",
+ img:"imagenes/lycra-buzo-biker.jpeg",
+ sizes:"32 · 34 · 36 · 38",
+ colors:"Negro · Azul Oscuro · Azul Pastel · Azul Rey",
+ desc:"Buzo de lycra de manga larga, ideal para complementar diferentes looks de playa y actividades al aire libre."
+},
+
+{
+ id:4,
+ name:"Biker Lycra",
+ ref:"B011",
+ cat:"Lycra",
+ img:"imagenes/lycra-buzo-biker.jpeg",
+ sizes:"32 · 34 · 36 · 38",
+ colors:"Negro · Azul Oscuro · Azul Pastel · Azul Rey",
+ desc:"Biker de lycra con diseño cómodo y versátil, pensado para combinar fácilmente con diferentes prendas."
+},
+
+{
+ id:5,
+ name:"Bikini",
+ ref:"7144",
+ cat:"Bikinis",
+ img:"imagenes/bikini-7144.jpeg",
+ sizes:"32 · 34 · 36 · 38",
+ colors:"Rosado · Amarillo Pastel · Café/Marfil · Azul Oscuro/Marfil",
+ desc:"Enterizo básico en bloques de color con espalda alta en U, diseñado para un look elegante y moderno."
+},
+
+{
+ id:6,
+ name:"Bikini Strapless",
+ ref:"6046",
+ cat:"Bikinis",
+ img:"imagenes/bikini-strapless-salida.jpeg",
+ sizes:"32 · 34 · 36",
+ colors:"Rosa/Celeste Pastel · Celeste/Amarillo Pastel · Negro/Marfil",
+ desc:"Bikini strapless con copas y tiras removibles, acompañado de panty tipo tanga de pierna alta."
+},
+
+{
+ id:7,
+ name:"Salida Vestida",
+ ref:"60",
+ cat:"Salidas de baño",
+ img:"imagenes/bikini-strapless-salida.jpeg",
+ sizes:"S · M · L",
+ colors:"Azul Pastel · Marfil · Negro",
+ desc:"Vestido corto en malla con manga larga acampanada, perfecto para complementar tus días de playa con elegancia."
+},
+
+{
+ id:8,
+ name:"Enterizo Escote",
+ ref:"7156",
+ cat:"Enterizos",
+ img:"imagenes/enterizo-escote-7156.jpeg",
+ sizes:"32 · 34 · 36 · 38",
+ colors:"Petróleo/Amarillo · Azul/Fucsia · Negro",
+ desc:"Enterizo halter con copa removible y escote en V en pecho y espalda."
+}
+
+];
+
+
+let cat="Todos";
+
+
+function setCat(c,btn){
+
+ cat=c;
+
+ document
+ .querySelectorAll(".cat")
+ .forEach(x=>x.classList.remove("active"));
+
+ btn.classList.add("active");
+
+ render();
+
+}
+
+
+function render(){
+
+ const q=document
+ .getElementById("search")
+ .value
+ .toLowerCase()
+ .trim();
+
+ const list=products.filter(p=>
+
+   (cat==="Todos" || p.cat===cat)
+
+   &&
+
+   (
+     !q
+     ||
+     p.name.toLowerCase().includes(q)
+     ||
+     p.cat.toLowerCase().includes(q)
+     ||
+     p.ref.toLowerCase().includes(q)
+   )
+
+ );
+
+
+ document.getElementById("products").innerHTML=
+
+ list.length
+
+ ?
+
+ list.map(p=>`
+
+ <article class="product">
+
+   <div class="pic">
+
+     <img
+       src="${p.img}"
+       alt="${p.name}"
+       loading="lazy"
+     >
+
+   </div>
+
+
+   <div class="info">
+
+     <div class="meta">
+       ${p.cat} · Ref. ${p.ref}
+     </div>
+
+     <h3>
+       ${p.name}
+     </h3>
+
+
+     <div class="specs">
+
+       <span class="spec-title">
+         Detalles de la prenda
+       </span>
+
+       <span>
+         ${p.desc}
+       </span>
+
+       <span>
+         <b>Tallas:</b>
+         ${p.sizes}
+       </span>
+
+       <span>
+         <b>Colores:</b>
+         ${p.colors}
+       </span>
+
+     </div>
+
+
+     <div class="price">
+       Consultar precio
+     </div>
+
+
+     <button class="add"
+       onclick="consultar('${p.name}')">
+
+       Consultar por WhatsApp
+
+     </button>
+
+   </div>
+
+ </article>
+
+ `).join("")
+
+ :
+
+ '<div class="no-results">No encontramos productos con esa búsqueda.</div>';
+
+}
+
+
+function consultar(nombre){
+
+ const mensaje =
+ `Hola STARFUXXIA, estoy interesada/o en el producto: ${nombre}. Quisiera conocer su precio y disponibilidad.`;
+
+ const url =
+ `https://wa.me/573013412415?text=${encodeURIComponent(mensaje)}`;
+
+ window.open(url,"_blank");
+
+}
+
+
+document
+.getElementById("search")
+.addEventListener("input",render);
+
+
+render();
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSySycCQE01E9TRbbfIXC3vsw6CFF7_MvtdIsz8",
+  authDomain: "starfuxxia-987dd.firebaseapp.com",
+  databaseURL: "https://starfuxxia-987dd-default-rtdb.firebaseio.com",
+  projectId: "starfuxxia-987dd",
+  storageBucket: "starfuxxia-987dd.appspot.com",
+  messagingSenderId: "154113912493",
+  appId: "1:154113912493:web:9b0a46479c921ee0b1a024",
+  measurementId: "G-GJK80ZDWYX"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+</script>
+</body>
 <!-- Botones de Sesión -->
 <div style="text-align: right; margin: 20px 30px;">
   <button onclick="iniciarSesionGoogle()" id="btn-google" style="background: linear-gradient(135deg, #4285F4, #34a853, #fbbc05, #ea4335); color: white; border: none; padding: 14px 28px; font-size: 17px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(66, 133, 244, 0.4); transition: all 0.3s ease;">
@@ -517,7 +967,7 @@ footer{
   <span id="usuario-nombre" style="margin-left:15px; color:#333; font-weight:500;"></span>
 </div>
 
-<!-- Panel de Administrador -->
+<!-- Panel de Administrador mejorado -->
 <div id="admin-panel" style="display:none; max-width: 500px; margin: 30px auto; padding: 30px; background: linear-gradient(135deg, #f0b000, #ffcc00); border-radius: 16px; box-shadow: 0 8px 30px rgba(255, 196, 0, 0.4);">
   <h2 style="text-align:center; color:#2d2d2d; margin-top:0;">⚙️ Agregar Producto</h2>
   <input type="text" id="prod-nombre" placeholder="📦 Nombre del producto" style="width:100%; padding:12px; margin:8px 0; border:none; border-radius:8px; font-size:15px; box-sizing:border-box;">
@@ -527,78 +977,4 @@ footer{
     ✅ Guardar Producto
   </button>
 </div>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyC5bXz9wCjVhCxH8KdC9sYb6dX7c8Z9X7c8Z9X7c8Z9",
-  authDomain: "starfuxxia-987dd.firebaseapp.com",
-  databaseURL: "https://starfuxxia-987dd-default-rtdb.firebaseio.com",
-  projectId: "starfuxxia-987dd",
-  storageBucket: "starfuxxia-987dd.appspot.com",
-  messagingSenderId: "154113912493",
-  appId: "1:154113912493:web:90a46479c921ee0b1e8b24"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-function iniciarSesionGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then((result) => {
-      mostrarUsuario(result.user);
-    })
-    .catch((error) => {
-      alert("Error: " + error.message);
-    });
-}
-
-function cerrarSesion() {
-  auth.signOut().then(() => {
-    document.getElementById('usuario-nombre').textContent = '';
-    document.getElementById('btn-google').style.display = 'block';
-    document.getElementById('btn-cerrar').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'none';
-  });
-}
-
-function mostrarUsuario(user) {
-  document.getElementById('usuario-nombre').textContent = user.email;
-  document.getElementById('btn-google').style.display = 'none';
-  document.getElementById('btn-cerrar').style.display = 'inline-block';
-  if (user.email === 'josealejandroruedaleon@gmail.com') {
-    document.getElementById('admin-panel').style.display = 'block';
-  }
-}
-
-function guardarProducto() {
-  const nombre = document.getElementById('prod-nombre').value;
-  const desc = document.getElementById('prod-desc').value;
-  const precio = document.getElementById('prod-precio').value;
-  
-  if (!nombre || !precio) { alert('Completa nombre y precio'); return; }
-  
-  db.collection('productos').add({
-    nombre: nombre,
-    descripcion: desc,
-    precio: parseFloat(precio),
-    fecha: new Date()
-  }).then(() => {
-    alert('✅ Producto guardado!');
-    document.getElementById('prod-nombre').value = '';
-    document.getElementById('prod-desc').value = '';
-    document.getElementById('prod-precio').value = '';
-  }).catch((error) => {
-    alert('Error: ' + error.message);
-  });
-}
-
-auth.onAuthStateChanged((user) => {
-  if (user) { mostrarUsuario(user); }
-});
-</script>
 </html>
