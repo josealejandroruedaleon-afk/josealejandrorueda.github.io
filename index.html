@@ -1062,14 +1062,159 @@ const db = firebase.database();
   <span id="usuario-nombre" style="margin-left:15px; color:#333; font-weight:500;"></span>
 </div>
 
-<!-- Panel de Administrador mejorado -->
-<div id="admin-panel" style="display:none; max-width: 500px; margin: 30px auto; padding: 30px; background: linear-gradient(135deg, #f0b000, #ffcc00); border-radius: 16px; box-shadow: 0 8px 30px rgba(255, 196, 0, 0.4);">
-  <h2 style="text-align:center; color:#2d2d2d; margin-top:0;">⚙️ Agregar Producto</h2>
-  <input type="text" id="prod-nombre" placeholder="📦 Nombre del producto" style="width:100%; padding:12px; margin:8px 0; border:none; border-radius:8px; font-size:15px; box-sizing:border-box;">
-  <textarea id="prod-desc" placeholder="📝 Descripción" style="width:100%; padding:12px; margin:8px 0; border:none; border-radius:8px; font-size:15px; min-height:100px; box-sizing:border-box;"></textarea>
-  <input type="number" id="prod-precio" placeholder="💰 Precio" style="width:100%; padding:12px; margin:8px 0; border:none; border-radius:8px; font-size:15px; box-sizing:border-box;">
-  <button onclick="guardarProducto()" style="width:100%; background: linear-gradient(135deg, #27ae60, #2ecc71); color:white; border:none; padding:14px; font-size:17px; font-weight:bold; border-radius:8px; cursor:pointer; margin-top:10px; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);">
-    ✅ Guardar Producto
+<!-- 📦 PANEL DE ADMINISTRADOR: AGREGAR Y GESTIONAR PRODUCTOS -->
+<div id="adminPanel" style="display:none; max-width: 600px; margin: 40px auto; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+  <h2 style="text-align: center; color: white; margin-bottom: 25px; font-size: 24px;">✨ Gestionar Productos</h2>
+  
+  <!-- ➕ FORMULARIO AGREGAR PRODUCTO -->
+  <div style="background: white; padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+    <h3 style="color: #667eea; margin-top: 0; margin-bottom: 20px;">➕ Nuevo Producto</h3>
+    
+    <!-- 📸 Foto -->
+    <div style="margin-bottom: 18px;">
+      <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px;">📸 Foto del producto</label>
+      <input type="file" id="fotoProducto" accept="image/*" style="width: 100%; padding: 10px; border: 2px dashed #667eea; border-radius: 8px; background: #f8f9ff; cursor: pointer;">
+      <div id="vistaPrevia" style="margin-top: 10px; display: none;">
+        <img id="imagenPreview" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 3px solid #667eea;">
+      </div>
+    </div>
+
+    <!-- 🏷️ Nombre -->
+    <div style="margin-bottom: 18px;">
+      <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px;">🏷️ Nombre</label>
+      <input type="text" id="nombreProducto" placeholder="Nombre del producto" style="width: 100%; padding: 11px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px;">
+    </div>
+
+    <!-- 💰 Precio -->
+    <div style="margin-bottom: 18px;">
+      <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px;">💰 Precio en COP ($)</label>
+      <input type="number" id="precioProducto" placeholder="Ej: 25000" style="width: 100%; padding: 11px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px;">
+    </div>
+
+    <!-- 📝 Descripción -->
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px;">📝 Descripción</label>
+      <textarea id="descripcionProducto" placeholder="Detalles del producto..." rows="3" style="width: 100%; padding: 11px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; resize: none;"></textarea>
+    </div>
+
+    <!-- 💾 Botón Guardar -->
+    <button onclick="guardarProducto()" style="width: 100%; padding: 13px; background: linear-gradient(90deg, #11998e, #38ef7d); color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: bold; cursor: pointer;">
+      ✅ Guardar Producto
+    </button>
+  </div>
+
+  <!-- 📋 LISTA DE PRODUCTOS (con botón eliminar) -->
+  <div style="background: white; padding: 25px; border-radius: 15px;">
+    <h3 style="color: #667eea; margin-top: 0; margin-bottom: 20px;">📋 Mis Productos</h3>
+    <div id="listaProductos">
+      <p style="color: #888; text-align: center; padding: 15px;">Cargando productos...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// 📸 Vista previa de imagen
+document.getElementById('fotoProducto').addEventListener('change', function(e) {
+  const archivo = e.target.files[0];
+  if (archivo) {
+    const lector = new FileReader();
+    lector.onload = function(event) {
+      document.getElementById('imagenPreview').src = event.target.result;
+      document.getElementById('vistaPrevia').style.display = 'block';
+    };
+    lector.readAsDataURL(archivo);
+  }
+});
+
+// 💾 Guardar producto
+function guardarProducto() {
+  const nombre = document.getElementById('nombreProducto').value;
+  const precio = document.getElementById('precioProducto').value;
+  const descripcion = document.getElementById('descripcionProducto').value;
+
+  if (!nombre || !precio) {
+    alert('⚠️ Escribe el nombre y el precio');
+    return;
+  }
+
+  const precioFormateado = new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+  }).format(precio);
+
+  db.collection('productos').add({
+    nombre: nombre,
+    precio: parseInt(precio),
+    precioFormateado: precioFormateado,
+    descripcion: descripcion,
+    fecha: new Date()
+  })
+  .then(() => {
+    alert('✅ ¡Producto guardado! 🎉');
+    limpiarFormulario();
+    cargarProductos(); // Recargar la lista
+  })
+  .catch((error) => {
+    alert('❌ Error: ' + error.message);
+  });
+}
+
+// 📋 Cargar y mostrar productos
+function cargarProductos() {
+  const lista = document.getElementById('listaProductos');
+  
+  db.collection('productos').orderBy('fecha', 'desc').onSnapshot((snapshot) => {
+    if (snapshot.empty) {
+      lista.innerHTML = '<p style="color: #888; text-align: center; padding: 15px;">No hay productos aún. ¡Agrega el primero! ✨</p>';
+      return;
+    }
+
+    lista.innerHTML = '';
+    snapshot.forEach((doc) => {
+      const prod = doc.data();
+      const productoHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #667eea;">
+          <div>
+            <strong style="font-size: 15px;">${prod.nombre}</strong>
+            <div style="color: #11998e; font-weight: bold; font-size: 14px;">${prod.precioFormateado}</div>
+          </div>
+          <button onclick="eliminarProducto('${doc.id}')" style="padding: 8px 14px; background: #ff4757; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            🗑️ Eliminar
+          </button>
+        </div>
+      `;
+      lista.innerHTML += productoHTML;
+    });
+  });
+}
+
+// 🗑️ Eliminar producto
+function eliminarProducto(id) {
+  if (confirm('⚠️ ¿Seguro que quieres eliminar este producto? Esta acción no se puede deshacer.')) {
+    db.collection('productos').doc(id).delete()
+    .then(() => {
+      alert('✅ Producto eliminado correctamente');
+    })
+    .catch((error) => {
+      alert('❌ No se pudo eliminar: ' + error.message);
+    });
+  }
+}
+
+// 🧹 Limpiar campos del formulario
+function limpiarFormulario() {
+  document.getElementById('nombreProducto').value = '';
+  document.getElementById('precioProducto').value = '';
+  document.getElementById('descripcionProducto').value = '';
+  document.getElementById('vistaPrevia').style.display = 'none';
+  document.getElementById('fotoProducto').value = '';
+}
+
+// 🚀 Cargar la lista automáticamente al entrar al panel
+// (Agrega esto donde detectas que el usuario inició sesión correctamente)
+cargarProductos();
+</script>
   </button>
 </div>
 </html>
