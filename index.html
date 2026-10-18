@@ -133,7 +133,7 @@ footer{background:var(--dark);color:white;padding:40px 22px}
     </div>
     <div class="field full">
       <label for="prod-foto-archivo">📷 Foto del producto</label>
-      <input type="file" id="prod-foto-archivo" accept="image/*" onchange="previsualizarFoto(this)">
+      <input type="file" id="prod-foto-archivo" accept="image/*">
       <span class="help">Elige la foto desde tu carpeta</span>
     </div>
     <div class="field full">
@@ -232,23 +232,11 @@ var products = [];
 var activeCat = "Todos";
 var cart = [];
 var unsubscribeProducts = null;
+var fotoDataUrl = ""; // Aquí guardamos la foto seleccionada
 
 function $(id){ return document.getElementById(id); }
 function money(n){ return new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(Number(n)||0); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
-
-function previsualizarFoto(input) {
-  var preview = $("media-preview");
-  preview.innerHTML = "";
-  if (input.files && input.files[0]) {
-    var lector = new FileReader();
-    lector.onload = function(e) {
-      preview.innerHTML = '<img src="'+e.target.result+'" alt="Vista previa" style="max-width:150px;border-radius:10px">';
-      $("prod-foto-url").value = e.target.result;
-    };
-    lector.readAsDataURL(input.files[0]);
-  }
-}
 
 function getYouTubeEmbedUrl(url){
   if(!url) return "";
@@ -338,11 +326,10 @@ async function guardarProducto(event){
   var descripcion = $("prod-desc").value.trim();
   var categoria = $("prod-cat").value;
   var referencia = $("prod-ref").value.trim();
-  var fotoUrl = $("prod-foto-url").value.trim();
   var videoUrl = $("prod-video-url").value.trim();
   
   if(!nombre || $("prod-precio").value==="" || precio<0){ setStatus("Escribe un nombre y un precio válido.", true); return; }
-  if(!fotoUrl && !videoUrl){ setStatus("Elige una foto o pon un enlace de video.", true); return; }
+  if(!fotoDataUrl && !videoUrl){ setStatus("Elige una foto o pon un enlace de video.", true); return; }
   
   $("save-product").disabled = true;
   $("save-product").textContent = "Guardando…";
@@ -352,13 +339,13 @@ async function guardarProducto(event){
     await doc.set({
       nombre: nombre, precio: precio, descripcion: descripcion,
       categoria: categoria, referencia: referencia,
-      imageUrl: fotoUrl, videoUrl: videoUrl || "",
+      imageUrl: fotoDataUrl, videoUrl: videoUrl || "",
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdBy: auth.currentUser.email
     });
     
     $("product-form").reset();
-    $("prod-foto-url").value = "";
+    fotoDataUrl = "";
     $("media-preview").innerHTML = "";
     setStatus("✅ ¡Producto publicado con éxito!");
     
@@ -409,6 +396,19 @@ function checkout(){
   var msg = "Hola STARFUXXIA, quiero hacer este pedido:\n"+lines+"\nTotal estimado: "+total+"\n¿Me confirman disponibilidad y entrega?";
   window.open("https://wa.me/573013412415?text="+encodeURIComponent(msg),"_blank","noopener");
 }
+
+// ✅ AQUÍ ESTÁ LA CORRECCIÓN: detectar cuando eliges la foto
+$("prod-foto-archivo").addEventListener("change", function(){
+  var archivo = this.files[0];
+  if(!archivo) return;
+  var lector = new FileReader();
+  lector.onload = function(e){
+    fotoDataUrl = e.target.result; // Guardamos la foto
+    $("media-preview").innerHTML = '<img src="'+fotoDataUrl+'" alt="Vista previa" style="max-width:150px;border-radius:10px">';
+    setStatus("✅ Foto cargada correctamente.");
+  };
+  lector.readAsDataURL(archivo);
+});
 
 // Eventos
 $("btn-google").addEventListener("click", iniciarSesionGoogle);
