@@ -106,7 +106,7 @@ footer{background:var(--dark);color:white;padding:40px 22px}
 
 <section id="admin-panel" class="admin" aria-label="Panel administrador">
   <h2>✨ Administrar productos</h2>
-  <p class="admin-intro">Pega los enlaces de tus fotos y videos. No necesitas subir archivos.</p>
+  <p class="admin-intro">Elige la foto desde tu computadora. ¡Así de fácil!</p>
   <form id="product-form" class="admin-form">
     <div class="field">
       <label for="prod-nombre">Nombre del producto *</label>
@@ -131,16 +131,17 @@ footer{background:var(--dark);color:white;padding:40px 22px}
       <label for="prod-desc">Descripción</label>
       <textarea id="prod-desc" maxlength="1000" placeholder="Tallas, colores y detalles del producto"></textarea>
     </div>
-    <div class="field">
-      <label for="prod-foto-url">🔗 Enlace de la foto del producto</label>
-      <input id="prod-foto-url" type="url" placeholder="Pega aquí el enlace de tu imagen">
-      <span class="help">Sube tu foto a Imgur, copia la dirección de imagen y pégala aquí.</span>
+    <div class="field full">
+      <label for="prod-foto-archivo">📷 Foto del producto</label>
+      <input type="file" id="prod-foto-archivo" accept="image/*" onchange="previsualizarFoto(this)">
+      <span class="help">Elige la foto desde tu carpeta</span>
     </div>
-    <div class="field">
+    <div class="field full">
       <label for="prod-video-url">🎥 Enlace del video de YouTube (opcional)</label>
       <input id="prod-video-url" type="url" placeholder="Ej: https://www.youtube.com/watch?v=abc123">
-      <span class="help">Sube el video como "No listado" en YouTube y pega el enlace aquí.</span>
+      <span class="help">Déjalo vacío si no tienes video</span>
     </div>
+    <input type="hidden" id="prod-foto-url">
     <div class="field full">
       <div id="media-preview" class="preview"></div>
       <button class="save" id="save-product" type="submit">＋ Publicar producto</button>
@@ -236,6 +237,19 @@ function $(id){ return document.getElementById(id); }
 function money(n){ return new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(Number(n)||0); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
 
+function previsualizarFoto(input) {
+  var preview = $("media-preview");
+  preview.innerHTML = "";
+  if (input.files && input.files[0]) {
+    var lector = new FileReader();
+    lector.onload = function(e) {
+      preview.innerHTML = '<img src="'+e.target.result+'" alt="Vista previa" style="max-width:150px;border-radius:10px">';
+      $("prod-foto-url").value = e.target.result;
+    };
+    lector.readAsDataURL(input.files[0]);
+  }
+}
+
 function getYouTubeEmbedUrl(url){
   if(!url) return "";
   var m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/);
@@ -270,7 +284,6 @@ function setStatus(msg, error){
 }
 
 function isAdmin(user){
-  // Si iniciaste sesión con Google, eres administrador
   return !!user;
 }
 
@@ -319,6 +332,7 @@ function renderAdminProducts(){
 async function guardarProducto(event){
   event.preventDefault();
   if(!isAdmin(auth && auth.currentUser)){ alert("Debes iniciar sesión primero."); return; }
+  
   var nombre = $("prod-nombre").value.trim();
   var precio = Number($("prod-precio").value);
   var descripcion = $("prod-desc").value.trim();
@@ -326,10 +340,13 @@ async function guardarProducto(event){
   var referencia = $("prod-ref").value.trim();
   var fotoUrl = $("prod-foto-url").value.trim();
   var videoUrl = $("prod-video-url").value.trim();
+  
   if(!nombre || $("prod-precio").value==="" || precio<0){ setStatus("Escribe un nombre y un precio válido.", true); return; }
-  if(!fotoUrl && !videoUrl){ setStatus("Pega al menos un enlace de foto o video.", true); return; }
+  if(!fotoUrl && !videoUrl){ setStatus("Elige una foto o pon un enlace de video.", true); return; }
+  
   $("save-product").disabled = true;
   $("save-product").textContent = "Guardando…";
+  
   try{
     var doc = db.collection("productos").doc();
     await doc.set({
@@ -339,9 +356,12 @@ async function guardarProducto(event){
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdBy: auth.currentUser.email
     });
+    
     $("product-form").reset();
+    $("prod-foto-url").value = "";
     $("media-preview").innerHTML = "";
     setStatus("✅ ¡Producto publicado con éxito!");
+    
   }catch(e){
     console.error(e);
     setStatus("❌ No se pudo publicar: " + e.message, true);
@@ -421,13 +441,6 @@ $("cart-drawer").addEventListener("click", function(e){
 });
 $("checkout").addEventListener("click", checkout);
 
-$("prod-foto-url").addEventListener("input", function(){
-  var url = $("prod-foto-url").value.trim();
-  $("media-preview").innerHTML = "";
-  if(url && /^https?:\/\//.test(url)){
-    $("media-preview").innerHTML = '<img src="'+esc(url)+'" alt="Vista previa" onerror="this.style.display=\'none\'">';
-  }
-});
 $("prod-video-url").addEventListener("input", function(){
   var url = $("prod-video-url").value.trim();
   $("media-preview").innerHTML = "";
