@@ -99,7 +99,6 @@ footer{background:var(--dark);color:white;padding:40px 22px}
 <section id="admin-panel" class="admin">
   <h2>✨ Panel de Administración</h2>
 
-  <!-- 📂 AGREGAR CATEGORÍAS -->
   <div class="admin-box">
     <h3>📂 Agregar categoría nueva</h3>
     <div style="display:flex;gap:10px;align-items:center">
@@ -112,7 +111,6 @@ footer{background:var(--dark);color:white;padding:40px 22px}
     <div id="cat-status" class="status"></div>
   </div>
 
-  <!-- 📦 AGREGAR PRODUCTOS -->
   <h3>📦 Agregar producto</h3>
   <form id="product-form" class="admin-form">
     <div class="field">
@@ -125,9 +123,7 @@ footer{background:var(--dark);color:white;padding:40px 22px}
     </div>
     <div class="field">
       <label for="prod-cat">Categoría *</label>
-      <select id="prod-cat">
-        <!-- Se llenan automáticamente -->
-      </select>
+      <select id="prod-cat"></select>
     </div>
     <div class="field">
       <label for="prod-ref">Referencia (opcional)</label>
@@ -143,16 +139,15 @@ footer{background:var(--dark);color:white;padding:40px 22px}
     </div>
     <div class="field full">
       <label for="prod-video-url">🎥 Video de YouTube (opcional)</label>
-      <input id="prod-video-url" type="url" placeholder="https://www.youtube.com/watch?v=…">
+      <input id="prod-video-url" type="url" placeholder="Deja vacío si no tienes">
     </div>
     <div class="field full">
       <div id="media-preview" class="preview"></div>
-      <button class="save" type="submit">✅ Publicar producto</button>
+      <button type="submit" class="save">✅ Publicar producto</button>
       <div id="admin-status" class="status"></div>
     </div>
   </form>
 
-  <!-- LISTA DE PRODUCTOS -->
   <div class="admin-list">
     <h3>📋 Productos publicados</h3>
     <div id="admin-products">Inicia sesión para ver tus productos</div>
@@ -181,9 +176,7 @@ footer{background:var(--dark);color:white;padding:40px 22px}
     <p>Descubre nuestra selección de moda y accesorios con diseños modernos, frescos y llenos de personalidad.</p>
     <a class="cta" href="#catalogo">Ver catálogo →</a>
   </div>
-  <div class="hero-art">
-    <div class="hero-card">👙✨</div>
-  </div>
+  <div class="hero-art"><div class="hero-card">👙✨</div></div>
 </section>
 
 <main id="catalogo">
@@ -194,12 +187,10 @@ footer{background:var(--dark);color:white;padding:40px 22px}
     </div>
   </div>
 
-  <!-- BOTONES DE CATEGORÍAS (aparecen automáticamente) -->
   <div class="categories" id="categorias-botones">
     <button class="cat active" data-cat="Todos">Todos</button>
   </div>
 
-  <!-- LISTA DE PRODUCTOS -->
   <div class="grid" id="products">
     <div class="empty">Cargando productos…</div>
   </div>
@@ -235,7 +226,6 @@ footer{background:var(--dark);color:white;padding:40px 22px}
 
 <a class="wa" href="https://wa.me/573013412415" target="_blank">💬 Escríbenos</a>
 
-<!-- CARRITO -->
 <div id="cart-drawer" class="cart-drawer">
   <div class="cart-box">
     <div class="cart-head">
@@ -248,7 +238,6 @@ footer{background:var(--dark);color:white;padding:40px 22px}
   </div>
 </div>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
@@ -257,7 +246,6 @@ footer{background:var(--dark);color:white;padding:40px 22px}
 (function(){
 'use strict';
 
-// TU CONFIGURACIÓN DE FIREBASE - YA ESTÁ COMPLETA
 var firebaseConfig = {
   apiKey: "AIzaSyCC0lE9wTRbbflXc3vsw6CFF7_MvtdIsz8",
   authDomain: "starfuxxia-987dd.firebaseapp.com",
@@ -308,25 +296,20 @@ async function iniciarSesionGoogle(){
 
 async function cerrarSesion(){ await auth.signOut(); }
 
-// 📂 RENDERIZAR CATEGORÍAS
 function renderCategorias(){
-  // Botones en el catálogo
   var cont = $("categorias-botones");
   cont.innerHTML = '<button class="cat active" data-cat="Todos">Todos</button>' +
     categorias.map(c=>'<button class="cat" data-cat="'+esc(c.nombre)+'">'+esc(c.nombre)+'</button>').join("");
   
-  // Lista desplegable al agregar productos
   var sel = $("prod-cat");
   sel.innerHTML = categorias.map(c=>'<option>'+esc(c.nombre)+'</option>').join("");
   
-  // Lista en panel de admin con opción de eliminar
   var lista = $("categorias-lista");
   lista.innerHTML = categorias.length ? categorias.map(c=>
     '<div class="cat-item"><span>'+esc(c.nombre)+'</span>'+
     '<button class="delete" data-del-cat="'+esc(c.id)+'">🗑️ Eliminar</button></div>'
   ).join("") : '<p class="status">No hay categorías. Agrega la primera arriba 👆</p>';
   
-  // Volver a asignar eventos a los botones nuevos
   cont.querySelectorAll(".cat").forEach(btn=>{
     btn.onclick = ()=>{
       activeCat = btn.dataset.cat;
@@ -357,7 +340,6 @@ async function eliminarCategoria(id){
   await db.collection("categorias").doc(id).delete();
 }
 
-// 📷 PREVISUALIZAR FOTO
 $("prod-foto-archivo").addEventListener("change",function(){
   var f = this.files[0]; if(!f) return;
   var r = new FileReader();
@@ -369,7 +351,6 @@ $("prod-foto-archivo").addEventListener("change",function(){
   r.readAsDataURL(f);
 });
 
-// 📦 GUARDAR PRODUCTO
 async function guardarProducto(e){
   e.preventDefault();
   if(!isAdmin(auth.currentUser)){ alert("Inicia sesión primero"); return; }
@@ -384,8 +365,9 @@ async function guardarProducto(e){
   if(!nombre || isNaN(precio)){ setStatus("Escribe nombre y precio",true); return; }
   if(!fotoDataUrl && !videoUrl){ setStatus("Sube una foto o pon un video",true); return; }
   
-  $("admin-status").textContent = "Guardando… ⏳";
-  $("save-product").disabled = true;
+  var boton = e.target.querySelector('button[type="submit"]');
+  boton.disabled = true;
+  setStatus("Guardando… ⏳");
   
   try{
     await db.collection("productos").doc().set({
@@ -397,18 +379,17 @@ async function guardarProducto(e){
     fotoDataUrl = "";
     $("media-preview").innerHTML = "";
     setStatus("✅ ¡Producto publicado con éxito!");
-  }catch(ex){ setStatus("Error: "+ex.message,true); }
-  
-  $("save-product").disabled = false;
+  }catch(ex){ 
+    setStatus("Error: "+ex.message,true); 
+  }
+  boton.disabled = false;
 }
 
-// 🗑️ ELIMINAR PRODUCTO
 async function eliminarProducto(id){
   if(!confirm("¿Eliminar este producto?")) return;
   await db.collection("productos").doc(id).delete();
 }
 
-// 📄 MOSTRAR PRODUCTOS EN LA TIENDA
 function renderProducts(){
   var q = $("search").value.toLowerCase().trim();
   var filtro = products.filter(p=>
@@ -430,7 +411,6 @@ function renderProducts(){
   ).join("") : '<div class="empty">No hay productos en esta categoría 💔</div>';
 }
 
-// MOSTRAR PRODUCTOS EN PANEL DE ADMIN
 function renderAdminProducts(){
   if(!isAdmin(auth.currentUser)) return;
   $("admin-products").innerHTML = products.length ? products.map(p=>
@@ -445,7 +425,6 @@ function renderAdminProducts(){
   ).join("") : '<p class="status">No hay productos aún. ¡Agrega el primero arriba! 👆</p>';
 }
 
-// 🛒 CARRITO
 function addToCart(id){
   var p = products.find(x=>x.id===id); if(!p) return;
   if(p.precio<=0){
@@ -477,7 +456,6 @@ function checkout(){
   window.open("https://wa.me/573013412415?text="+encodeURIComponent(msg),"_blank");
 }
 
-// ⚡ EVENTOS
 $("btn-google").onclick = iniciarSesionGoogle;
 $("btn-cerrar").onclick = cerrarSesion;
 $("product-form").onsubmit = guardarProducto;
@@ -501,7 +479,6 @@ $("cart-drawer").onclick = e=>{
 };
 $("checkout").onclick = checkout;
 
-// 🔥 INICIAR FIREBASE
 firebase.initializeApp(firebaseConfig);
 auth = firebase.auth();
 db = firebase.firestore();
@@ -513,12 +490,10 @@ auth.onAuthStateChanged(user=>{
   $("admin-panel").style.display = user ? "block" : "none";
   
   if(user){
-    // Escuchar cambios en categorías EN TIEMPO REAL
     db.collection("categorias").orderBy("nombre").onSnapshot(snap=>{
       categorias = snap.docs.map(d=>({id:d.id,nombre:d.data().nombre}));
       renderCategorias();
     });
-    // Escuchar cambios en productos EN TIEMPO REAL
     db.collection("productos").orderBy("createdAt","desc").onSnapshot(snap=>{
       products = snap.docs.map(d=>{var x=d.data();x.id=d.id;return x;});
       renderProducts();
