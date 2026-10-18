@@ -36,7 +36,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
-<!-- ✅ Ya NO usamos Firebase Storage → sin tarjeta requerida ✅ -->
 <script>
 'use strict';
 const ADMIN_EMAIL='josealejandroruedaleon@gmail.com';
@@ -45,7 +44,6 @@ let auth=null,db=null,products=[],activeCat='Todos',cart=[];let unsubscribeProdu
 const $=id=>document.getElementById(id);const money=n=>new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(Number(n)||0);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-// Convertir enlace de YouTube a formato de inserción
 function getYouTubeEmbedUrl(url){
   if(!url)return'';
   let videoId='';
@@ -68,35 +66,234 @@ function mediaMarkup(p){
 
 function normalized(p){return {...p,name:p.nombre||p.name||'Producto',description:p.descripcion||p.description||'',price:Number(p.precio??p.price??0),category:p.categoria||p.cat||'Otros',ref:p.referencia||p.ref||''};}
 function setStatus(msg,error=false){$('admin-status').textContent=msg;$('admin-status').style.color=error?'#b42332':'#786c73';}
-function initFirebase(){try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});auth.onAuthStateChanged(user=>{const admin=isAdmin(user);$('btn-google').hidden=!!user;$('btn-cerrar').hidden=!user;$('usuario-nombre').textContent=user?`Sesión: ${user.email}`:'';$('admin-panel').style.display=admin?'block':'none';if(unsubscribeProducts){unsubscribeProducts();unsubscribeProducts=null;}if(db){unsubscribeProducts=db.collection('productos').onSnapshot(snapshot=>{products=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderProducts();if(admin)renderAdminProducts();},err=>{console.error(err);$('products').innerHTML='<div class="empty">No se pudo cargar el catálogo.</div>';if(admin)setStatus('Error cargando productos: '+err.message,true);});}if(!admin&&user&&String(user.email||'').toLowerCase()!==ADMIN_EMAIL){setStatus('Esta cuenta puede comprar, pero no administrar la tienda.',true);}});}catch(e){console.error(e);$('products').innerHTML='<div class="empty">No se pudo iniciar Firebase.</div>';}}
-function isAdmin(user=auth?.currentUser){return !!user&&user.emailVerified!==false&&String(user.email||'').toLowerCase()===ADMIN_EMAIL;}
-async function iniciarSesionGoogle(){try{const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});const result=await auth.signInWithPopup(provider);if(!isAdmin(result.user)){await auth.signOut();alert('Esta cuenta no tiene permiso para administrar STARFUXXIA. Usa '+ADMIN_EMAIL+'.');}}catch(e){alert('No se pudo iniciar sesión: '+e.message);}}
-async function cerrarSesion(){try{await auth.signOut();setStatus('Sesión cerrada.');}catch(e){alert('Error al cerrar sesión: '+e.message);}}
 
-function renderProducts(){const q=$('search').value.toLowerCase().trim();const list=products.map(normalized).filter(p=>(activeCat==='Todos'||p.category===activeCat)&&(!q||`${p.name} ${p.category} ${p.ref} ${p.description}`.toLowerCase().includes(q)));$('products').innerHTML=list.length?list.map(p=>`<article class="product"><div class="pic">${mediaMarkup(p)}</div><div class="info"><div class="meta">${esc(p.category)}${p.ref?' · Ref. '+esc(p.ref):''}</div><h3>${esc(p.name)}</h3><div class="description">${esc(p.description)}</div><div class="price">${p.price>0?money(p.price):'Consultar precio'}</div><button class="add" data-add="${esc(p.id)}">Añadir al carrito</button></div></article>`).join(''):'<div class="empty">No encontramos productos con esa búsqueda.</div>';}
-function renderAdminProducts(){if(!isAdmin()){ $('admin-products').textContent='Acceso solo para el administrador autorizado.';return;}if(!products.length){$('admin-products').innerHTML='<p class="help">Todavía no hay productos publicados.</p>';return;}$('admin-products').innerHTML=products.map(p=>{const n=normalized(p);return `<div class="admin-item"><div style="width:55px;height:55px;overflow:hidden;border-radius:9px">${mediaMarkup(p)}</div><div class="grow"><strong>${esc(n.name)}</strong><div class="help">${money(n.price)} · ${esc(n.category)}</div></div><button class="delete" data-delete="${esc(p.id)}">🗑️ Eliminar</button></div>`;}).join('');}}
+function isAdmin(user){
+  if(!user)return false;
+  return user.emailVerified!==false && String(user.email).toLowerCase()===ADMIN_EMAIL;
+}
 
-async function guardarProducto(event){event.preventDefault();if(!isAdmin()){alert('Debes iniciar sesión con el correo administrador autorizado.');return;}const nombre=$('prod-nombre').value.trim(),precio=Number($('prod-precio').value),descripcion=$('prod-desc').value.trim(),categoria=$('prod-cat').value,referencia=$('prod-ref').value.trim(),fotoUrl=$('prod-foto-url').value.trim(),videoUrl=$('prod-video-url').value.trim();if(!nombre||$('prod-precio').value===''||precio<0){setStatus('Escribe un nombre y un precio válido.',true);return;}if(!fotoUrl&&!videoUrl){setStatus('Pega al menos un enlace de foto o video.',true);return;}$('save-product').disabled=true;$('save-product').textContent='Guardando…';try{const doc=db.collection('productos').doc();await doc.set({nombre,precio,descripcion,categoria,referencia,imageUrl:fotoUrl,videoUrl:videoUrl||'',createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:auth.currentUser.email});$('product-form').reset();$('media-preview').innerHTML='';setStatus('✅ ¡Producto publicado con éxito!');}catch(e){console.error(e);setStatus('❌ No se pudo publicar: '+e.message,true);}finally{$('save-product').disabled=false;$('save-product').textContent='＋ Publicar producto';}}
+async function iniciarSesionGoogle(){
+  try{
+    const provider=new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({prompt:'select_account'});
+    const result=await auth.signInWithPopup(provider);
+    if(!isAdmin(result.user)){
+      await auth.signOut();
+      alert('Esta cuenta no tiene permiso para administrar STARFUXXIA. Usa '+ADMIN_EMAIL+'.');
+    }
+  }catch(e){
+    alert('No se pudo iniciar sesión: '+e.message);
+  }
+}
 
-async function eliminarProducto(id){if(!isAdmin()){alert('No tienes permiso para eliminar productos.');return;}const p=products.find(x=>x.id===id);if(!p||!confirm(`¿Eliminar “${p.nombre||p.name||'este producto'}”?`))return;try{await db.collection('productos').doc(id).delete();setStatus('✅ Producto eliminado.');}catch(e){alert('No se pudo eliminar: '+e.message);}}
+async function cerrarSesion(){
+  try{
+    await auth.signOut();
+    setStatus('Sesión cerrada.');
+  }catch(e){
+    alert('Error al cerrar sesión: '+e.message);
+  }
+}
 
-function addToCart(id){const p=products.find(x=>x.id===id);if(!p)return;const n=normalized(p);if(n.price<=0){consultar(n.name);return;}const found=cart.find(x=>x.id===id);if(found)found.qty++;else cart.push({id,name:n.name,price:n.price,qty:1});renderCart();$('cart-drawer').classList.add('open');}
-function renderCart(){$('count').textContent=cart.reduce((s,p)=>s+p.qty,0);$('cart-items').innerHTML=cart.length?cart.map(p=>`<div class="cart-line"><div><strong>${esc(p.name)}</strong><div class="help">${money(p.price)} × ${p.qty}</div></div><div><strong>${money(p.price*p.qty)}</strong><br><button class="delete" data-remove="${esc(p.id)}">Quitar</button></div></div>`).join(''):'<p class="help">Tu carrito está vacío.</p>';$('cart-total').textContent='Total: '+money(cart.reduce((s,p)=>s+p.price*p.qty,0));}
-function checkout(){if(!cart.length){alert('Agrega un producto al carrito primero.');return;}const lines=cart.map(p=>`• ${p.name} x${p.qty} — ${money(p.price*p.qty)}`).join('\n');const total=money(cart.reduce((s,p)=>s+p.price*p.qty,0));const msg=`Hola STARFUXXIA, quiero hacer este pedido:\n${lines}\nTotal estimado: ${total}\n¿Me confirman disponibilidad y entrega?`;window.open('https://wa.me/573013412415?text='+encodeURIComponent(msg),'_blank','noopener');}
-function consultar(nombre){window.open('https://wa.me/573013412415?text='+encodeURIComponent(`Hola STARFUXXIA, quisiera conocer el precio y disponibilidad de: ${nombre}.`),'_blank','noopener');}
+function initFirebase(){
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+    auth=firebase.auth();
+    db=firebase.firestore();
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+    auth.onAuthStateChanged(user=>{
+      const admin=isAdmin(user);
+      $('btn-google').hidden=!!user;
+      $('btn-cerrar').hidden=!user;
+      $('usuario-nombre').textContent=user?`Sesión: ${user.email}`:'';
+      $('admin-panel').style.display=admin?'block':'none';
+      if(unsubscribeProducts){
+        unsubscribeProducts();
+        unsubscribeProducts=null;
+      }
+      if(db){
+        unsubscribeProducts=db.collection('productos').onSnapshot({includeMetadataChanges:true},snapshot=>{
+          products=snapshot.docs.map(d=>({id:d.id,...d.data()}));
+          renderProducts();
+          if(admin)renderAdminProducts();
+        },err=>{
+          console.error(err);
+          $('products').innerHTML='<div class="empty">No se pudo cargar el catálogo.</div>';
+          if(admin)setStatus('Error cargando productos: '+err.message,true);
+        });
+      }
+      if(!admin&&user&&String(user.email).toLowerCase()!==ADMIN_EMAIL){
+        setStatus('Esta cuenta puede comprar, pero no administrar la tienda.',true);
+      }
+    });
+  }catch(e){
+    console.error(e);
+    $('products').innerHTML='<div class="empty">No se pudo iniciar Firebase.</div>';
+  }
+}
+
+function renderProducts(){
+  const q=$('search').value.toLowerCase().trim();
+  const list=products.map(normalized).filter(p=>(activeCat==='Todos'||p.category===activeCat)&&(!q||`${p.name} ${p.category} ${p.ref} ${p.description}`.toLowerCase().includes(q)));
+  $('products').innerHTML=list.length?list.map(p=>`<article class="product"><div class="pic">${mediaMarkup(p)}</div><div class="info"><div class="meta">${esc(p.category)}${p.ref?' · Ref. '+esc(p.ref):''}</div><h3>${esc(p.name)}</h3><div class="description">${esc(p.description)}</div><div class="price">${p.price>0?money(p.price):'Consultar precio'}</div><button class="add" data-add="${esc(p.id)}">Añadir al carrito</button></div></article>`).join(''):'<div class="empty">No encontramos productos con esa búsqueda.</div>';
+}
+
+function renderAdminProducts(){
+  if(!isAdmin()){
+    $('admin-products').textContent='Acceso solo para el administrador autorizado.';
+    return;
+  }
+  if(!products.length){
+    $('admin-products').innerHTML='<p class="help">Todavía no hay productos publicados.</p>';
+    return;
+  }
+  $('admin-products').innerHTML=products.map(p=>{
+    const n=normalized(p);
+    return `<div class="admin-item"><div style="width:55px;height:55px;overflow:hidden;border-radius:9px">${mediaMarkup(p)}</div><div class="grow"><strong>${esc(n.name)}</strong><div class="help">${money(n.price)} · ${esc(n.category)}</div></div><button class="delete" data-delete="${esc(p.id)}">🗑️ Eliminar</button></div>`;
+  }).join('');
+}
+
+async function guardarProducto(event){
+  event.preventDefault();
+  if(!isAdmin()){
+    alert('Debes iniciar sesión con el correo administrador autorizado.');
+    return;
+  }
+  const nombre=$('prod-nombre').value.trim();
+  const precio=Number($('prod-precio').value);
+  const descripcion=$('prod-desc').value.trim();
+  const categoria=$('prod-cat').value;
+  const referencia=$('prod-ref').value.trim();
+  const fotoUrl=$('prod-foto-url').value.trim();
+  const videoUrl=$('prod-video-url').value.trim();
+  
+  if(!nombre||$('prod-precio').value===''||precio<0){
+    setStatus('Escribe un nombre y un precio válido.',true);
+    return;
+  }
+  if(!fotoUrl&&!videoUrl){
+    setStatus('Pega al menos un enlace de foto o video.',true);
+    return;
+  }
+  
+  $('save-product').disabled=true;
+  $('save-product').textContent='Guardando…';
+  
+  try{
+    const doc=db.collection('productos').doc();
+    await doc.set({
+      nombre,
+      precio,
+      descripcion,
+      categoria,
+      referencia,
+      imageUrl:fotoUrl,
+      videoUrl:videoUrl||'',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:auth.currentUser.email
+    });
+    $('product-form').reset();
+    $('media-preview').innerHTML='';
+    setStatus('✅ ¡Producto publicado con éxito!');
+  }catch(e){
+    console.error(e);
+    setStatus('❌ No se pudo publicar: '+e.message,true);
+  }finally{
+    $('save-product').disabled=false;
+    $('save-product').textContent='＋ Publicar producto';
+  }
+}
+
+async function eliminarProducto(id){
+  if(!isAdmin()){
+    alert('No tienes permiso para eliminar productos.');
+    return;
+  }
+  const p=products.find(x=>x.id===id);
+  if(!p||!confirm(`¿Eliminar "${p.nombre||p.name||'este producto'}"?`))return;
+  try{
+    await db.collection('productos').doc(id).delete();
+    setStatus('✅ Producto eliminado.');
+  }catch(e){
+    alert('No se pudo eliminar: '+e.message);
+  }
+}
+
+function addToCart(id){
+  const p=products.find(x=>x.id===id);
+  if(!p)return;
+  const n=normalized(p);
+  if(n.price<=0){
+    window.open('https://wa.me/573013412415?text='+encodeURIComponent(`Hola STARFUXXIA, quisiera conocer el precio y disponibilidad de: ${n.name}.`),'_blank','noopener');
+    return;
+  }
+  const found=cart.find(x=>x.id===id);
+  if(found)found.qty++;
+  else cart.push({id,name:n.name,price:n.price,qty:1});
+  renderCart();
+  $('cart-drawer').classList.add('open');
+}
+
+function renderCart(){
+  $('count').textContent=cart.reduce((s,p)=>s+p.qty,0);
+  $('cart-items').innerHTML=cart.length?cart.map(p=>`<div class="cart-line"><div><strong>${esc(p.name)}</strong><div class="help">${money(p.price)} × ${p.qty}</div></div><div><strong>${money(p.price*p.qty)}</strong><br><button class="delete" data-remove="${esc(p.id)}">Quitar</button></div></div>`).join(''):'<p class="help">Tu carrito está vacío.</p>';
+  $('cart-total').textContent='Total: '+money(cart.reduce((s,p)=>s+p.price*p.qty,0));
+}
+
+function checkout(){
+  if(!cart.length){
+    alert('Agrega un producto al carrito primero.');
+    return;
+  }
+  const lines=cart.map(p=>`• ${p.name} x${p.qty} — ${money(p.price*p.qty)}`).join('\n');
+  const total=money(cart.reduce((s,p)=>s+p.price*p.qty,0));
+  const msg=`Hola STARFUXXIA, quiero hacer este pedido:\n${lines}\nTotal estimado: ${total}\n¿Me confirman disponibilidad y entrega?`;
+  window.open('https://wa.me/573013412415?text='+encodeURIComponent(msg),'_blank','noopener');
+}
 
 // Vista previa de enlaces
-$('prod-foto-url').addEventListener('input',()=>{const url=$('prod-foto-url').value.trim();$('media-preview').innerHTML='';if(url&&/^https?:\/\//.test(url))$('media-preview').innerHTML=`<img src="${esc(url)}" alt="Vista previa" onerror="this.style.display='none'">`;});
-$('prod-video-url').addEventListener('input',()=>{const url=$('prod-video-url').value.trim();$('media-preview').innerHTML='';if(url&&isYouTubeUrl(url))$('media-preview').innerHTML=`<iframe src="${esc(getYouTubeEmbedUrl(url))}" allowfullscreen loading="lazy"></iframe>`;});
+$('prod-foto-url').addEventListener('input',()=>{
+  const url=$('prod-foto-url').value.trim();
+  $('media-preview').innerHTML='';
+  if(url&&/^https?:\/\//.test(url)){
+    $('media-preview').innerHTML=`<img src="${esc(url)}" alt="Vista previa" onerror="this.style.display='none'">`;
+  }
+});
 
+$('prod-video-url').addEventListener('input',()=>{
+  const url=$('prod-video-url').value.trim();
+  $('media-preview').innerHTML='';
+  if(url&&isYouTubeUrl(url)){
+    $('media-preview').innerHTML=`<iframe src="${esc(getYouTubeEmbedUrl(url))}" allowfullscreen loading="lazy"></iframe>`;
+  }
+});
+
+// Eventos
 $('product-form').addEventListener('submit',guardarProducto);
 $('search').addEventListener('input',renderProducts);
-document.querySelectorAll('.cat').forEach(btn=>btn.addEventListener('click',()=>{activeCat=btn.dataset.cat;document.querySelectorAll('.cat').forEach(b=>b.classList.toggle('active',b===btn));renderProducts();}));
-$('products').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(b)addToCart(b.dataset.add);});
-$('admin-products').addEventListener('click',e=>{const b=e.target.closest('[data-delete]');if(b)eliminarProducto(b.dataset.delete);});
+document.querySelectorAll('.cat').forEach(btn=>btn.addEventListener('click',()=>{
+  activeCat=btn.dataset.cat;
+  document.querySelectorAll('.cat').forEach(b=>b.classList.toggle('active',b===btn));
+  renderProducts();
+}));
+$('products').addEventListener('click',e=>{
+  const b=e.target.closest('[data-add]');
+  if(b)addToCart(b.dataset.add);
+});
+$('admin-products').addEventListener('click',e=>{
+  const b=e.target.closest('[data-delete]');
+  if(b)eliminarProducto(b.dataset.delete);
+});
 $('open-cart').addEventListener('click',()=>{$('cart-drawer').classList.add('open');renderCart();});
 $('close-cart').addEventListener('click',()=>$('cart-drawer').classList.remove('open'));
-$('cart-drawer').addEventListener('click',e=>{if(e.target===$('cart-drawer'))$('cart-drawer').classList.remove('open');const b=e.target.closest('[data-remove]');if(b){cart=cart.filter(p=>p.id!==b.dataset.remove);renderCart();}});
+$('cart-drawer').addEventListener('click',e=>{
+  if(e.target===$('cart-drawer'))$('cart-drawer').classList.remove('open');
+  const b=e.target.closest('[data-remove]');
+  if(b){
+    cart=cart.filter(p=>p.id!==b.dataset.remove);
+    renderCart();
+  }
+});
 $('checkout').addEventListener('click',checkout);
 
 initFirebase();
