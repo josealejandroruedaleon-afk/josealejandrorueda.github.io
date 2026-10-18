@@ -68,8 +68,8 @@ function normalized(p){return {...p,name:p.nombre||p.name||'Producto',descriptio
 function setStatus(msg,error=false){$('admin-status').textContent=msg;$('admin-status').style.color=error?'#b42332':'#786c73';}
 
 function isAdmin(user){
-  if(!user)return false;
-  return user.emailVerified!==false && String(user.email).toLowerCase()===ADMIN_EMAIL;
+  function isAdmin(user){
+  return !!user;
 }
 
 async function iniciarSesionGoogle(){
