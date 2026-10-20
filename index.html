@@ -60,7 +60,7 @@ footer{background:var(--dark);color:white;padding:40px 22px}
 .footer-in{max-width:1200px;margin:auto;display:flex;justify-content:space-between;flex-wrap:wrap}
 .wa{position:fixed;right:20px;bottom:20px;z-index:25;background:var(--green);color:white;padding:13px 18px;border-radius:50px;font-weight:900}
 .login-area{max-width:1200px;margin:16px auto 0;padding:0 22px;text-align:right}
-.login-area button{border:0;border-radius:24px;padding:11px 16px;font-weight:800;background:#fff0f6;color:#a62d60}
+.login-area button{border:0;border-radius:24px;padding:11px 16px;font-weight:800;background:#fff0f6;color:#a62d60;margin-left:8px}
 .login-area #btn-cerrar{background:var(--dark);color:white}
 .user-label{font-size:12px;color:var(--muted);margin-right:10px}
 .admin{display:none;max-width:900px;margin:20px auto 30px;padding:22px;background:linear-gradient(135deg,#fff3f8,#ffe0ec);border:1px solid var(--line);border-radius:22px}
@@ -87,6 +87,10 @@ footer{background:var(--dark);color:white;padding:40px 22px}
 .quitar-dto{border:0;background:#fff8e1;color:#9a6b00;border-radius:9px;padding:9px 11px;font-weight:800}
 .quitar-dto:hover{background:#fff0c7}
 .delete{border:0;background:#fff0f0;color:#b42332;border-radius:9px;padding:9px 11px;font-weight:800}
+.undo-bar{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#fff3cd;border:1px solid #ffe08a;padding:12px 20px;border-radius:12px;z-index:100;display:none;gap:12px;align-items:center;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.undo-bar button{border:0;border-radius:8px;padding:8px 14px;font-weight:800}
+.undo-bar .undo-btn{background:#25d366;color:white}
+.undo-bar .dismiss-btn{background:transparent;color:#786c73;text-decoration:underline}
 .empty{padding:25px;text-align:center;color:var(--muted);grid-column:1/-1}
 .cat-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
 .cart-drawer{display:none;position:fixed;inset:0;background:#211b2077;z-index:50;justify-content:flex-end}
@@ -99,11 +103,20 @@ footer{background:var(--dark);color:white;padding:40px 22px}
 .checkout{width:100%;border:0;background:var(--green);color:white;border-radius:12px;padding:14px;font-weight:900}
 .status{font-size:13px;margin-top:10px;color:var(--muted)}
 .help{font-size:12px;color:var(--muted)}
+.retry-btn{display:inline-block;margin-top:10px;padding:8px 16px;background:var(--pink);color:white;border-radius:8px;border:0;font-weight:800}
+.backup-btn{background:#25d366;color:white;border:0;border-radius:10px;padding:10px 16px;font-weight:800;margin-bottom:15px}
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{grid-template-columns:1fr}.hero-art{display:none}.links{display:none}.features{grid-template-columns:1fr}}
 @media(max-width:560px){.nav{padding:11px 13px}.grid{gap:10px}.pic{height:190px}.info{padding:11px}.hero-copy{padding:50px 20px}.hero h1{font-size:52px}main{padding:40px 13px}.admin{margin:15px 12px;padding:14px}.admin-form{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+
+<div class="undo-bar" id="undo-bar">
+  <span id="undo-text">Cambio realizado</span>
+  <button class="undo-btn" id="undo-btn">↩️ Deshacer</button>
+  <button class="dismiss-btn" id="dismiss-undo">Cerrar</button>
+</div>
+
 <div class="top">✨ Moda y accesorios · Pedidos por WhatsApp · San Gil, Santander, Colombia</div>
 <div class="login-area">
   <span id="usuario-nombre" class="user-label"></span>
@@ -112,6 +125,7 @@ footer{background:var(--dark);color:white;padding:40px 22px}
 </div>
 <section id="admin-panel" class="admin">
   <h2>✨ Panel de Administración</h2>
+  <button class="backup-btn" id="btn-backup">💾 Descargar respaldo de TODO</button>
   <div class="admin-box">
     <h3>📂 Agregar categoría nueva</h3>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -151,7 +165,7 @@ footer{background:var(--dark);color:white;padding:40px 22px}
       <textarea id="prod-desc" maxlength="1000" placeholder="Tallas, colores, materiales…"></textarea>
     </div>
     <div class="field full">
-      <label>📷 Foto del producto * (al editar, si no subes una nueva se conserva la actual)</label>
+      <label>📷 Foto del producto * (se comprime automáticamente)</label>
       <input type="file" id="prod-foto-archivo" accept="image/*">
     </div>
     <div class="field full">
@@ -248,12 +262,15 @@ footer{background:var(--dark);color:white;padding:40px 22px}
     <button class="checkout" id="checkout">📦 Enviar pedido por WhatsApp</button>
   </div>
 </div>
+
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+
 <script>
 (function(){
 'use strict';
+
 var firebaseConfig = {
   apiKey: "AIzaSyCC0lE9wTRbbflXc3vsw6CFF7_MvtdIsz8",
   authDomain: "starfuxxia-987dd.firebaseapp.com",
@@ -262,6 +279,7 @@ var firebaseConfig = {
   messagingSenderId: "154113912493",
   appId: "1:154113912493:web:9b0a46479c921ee0b1a024"
 };
+
 var OFERTAS = "__OFERTAS__";
 var auth, db;
 var products = [];
@@ -270,6 +288,9 @@ var activeCat = "Todos";
 var cart = [];
 var fotoDataUrl = "";
 var editingId = null;
+var undoTimeout = null;
+var undoAction = null;
+
 function $(id){ return document.getElementById(id); }
 function money(n){ return new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(Number(n)||0); }
 function esc(s){ return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -297,6 +318,67 @@ function setStatus(msg,err,id){
 }
 function isAdmin(u){ return !!u; }
 function submitBtn(){ return $("btn-submit-prod"); }
+
+// === COMPRESIÓN DE FOTOS ===
+function comprimirFoto(archivo, maxAncho=800, calidad=0.8){
+  return new Promise(function(resolver){
+    var lector = new FileReader();
+    lector.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var canvas = document.createElement("canvas");
+        var w = img.width;
+        var h = img.height;
+        if(w > maxAncho){
+          h = Math.round(h * maxAncho / w);
+          w = maxAncho;
+        }
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        resolver(canvas.toDataURL("image/jpeg", calidad));
+      };
+      img.src = e.target.result;
+    };
+    lector.readAsDataURL(archivo);
+  });
+}
+
+// === DESHACER ===
+function mostrarDeshacer(texto, funcionDeshacer){
+  if(undoTimeout) clearTimeout(undoTimeout);
+  undoAction = funcionDeshacer;
+  $("undo-text").textContent = texto;
+  $("undo-bar").style.display = "flex";
+  undoTimeout = setTimeout(function(){
+    $("undo-bar").style.display = "none";
+    undoAction = null;
+  }, 10000);
+}
+function ocultarDeshacer(){
+  if(undoTimeout) clearTimeout(undoTimeout);
+  $("undo-bar").style.display = "none";
+  undoAction = null;
+}
+
+// === RESPALDO ===
+function descargarRespaldo(){
+  var datos = {
+    fecha: new Date().toISOString(),
+    productos: products,
+    categorias: categorias
+  };
+  var blob = new Blob([JSON.stringify(datos, null, 2)], {type:"application/json"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "respaldo-starfuxxia-" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus("✅ Respaldo descargado");
+}
+
 async function iniciarSesionGoogle(){
   try{
     var p = new firebase.auth.GoogleAuthProvider();
@@ -306,6 +388,7 @@ async function iniciarSesionGoogle(){
 }
 async function cerrarSesion(){ await auth.signOut(); }
 function contarOfertas(){ return products.filter(function(p){ return dtoOf(p)>0; }).length; }
+
 function renderCategorias(){
   var cont = $("categorias-botones");
   var enOferta = contarOfertas();
@@ -315,16 +398,13 @@ function renderCategorias(){
       return '<button class="cat'+(activeCat===c.nombre?' active':'')+'" data-cat="'+esc(c.nombre)+'">'+esc(c.nombre)+'</button>';
     }).join("");
   cont.innerHTML = html;
-
   var sel = $("prod-cat");
   sel.innerHTML = categorias.map(function(c){ return '<option>'+esc(c.nombre)+'</option>'; }).join("");
-
   var lista = $("categorias-lista");
   lista.innerHTML = categorias.length ? categorias.map(function(c){
     return '<div class="cat-item"><span>'+esc(c.nombre)+'</span>'+
       '<button class="delete" data-del-cat="'+esc(c.id)+'">🗑️ Eliminar</button></div>';
   }).join("") : '<p class="status">No hay categorías. Agrega la primera arriba 👆</p>';
-
   cont.querySelectorAll(".cat").forEach(function(btn){
     btn.onclick = function(){
       activeCat = btn.dataset.cat;
@@ -333,12 +413,14 @@ function renderCategorias(){
     };
   });
 }
+
 function refrescarContadorOfertas(){
   var btn = document.querySelector('#categorias-botones .cat.ofertas');
   if(!btn) return;
   var n = contarOfertas();
   btn.textContent = '💸 OFERTAS' + (n ? ' ('+n+')' : '');
 }
+
 async function agregarCategoria(){
   var nombre = $("nueva-categoria").value.trim();
   if(!nombre){ setStatus("Escribe un nombre",true,"cat-status"); return; }
@@ -346,28 +428,42 @@ async function agregarCategoria(){
     setStatus("Esa categoría ya existe",true,"cat-status"); return;
   }
   try{
-    await db.collection("categorias").add({
+    var refNueva = await db.collection("categorias").add({
       nombre: nombre,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    var categoriaOriginal = {id: refNueva.id, nombre: nombre};
     $("nueva-categoria").value = "";
     setStatus("✅ Categoría agregada",false,"cat-status");
+    mostrarDeshacer("Categoría agregada: "+nombre, async function(){
+      await db.collection("categorias").doc(refNueva.id).delete();
+    });
   }catch(e){ setStatus("Error: "+e.message,true,"cat-status"); }
 }
+
 async function eliminarCategoria(id){
+  var cat = categorias.find(function(c){ return c.id === id; });
   if(!confirm("¿Eliminar esta categoría? Los productos NO se borran")) return;
-  await db.collection("categorias").doc(id).delete();
+  var catOriginal = categorias.find(function(c){ return c.id === id; });
+  try{
+    await db.collection("categorias").doc(id).delete();
+    mostrarDeshacer("Categoría eliminada: "+(catOriginal?.nombre||id), async function(){
+      await db.collection("categorias").doc(id).set({
+        nombre: catOriginal.nombre,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+  }catch(e){ alert("Error: "+e.message); }
 }
-$("prod-foto-archivo").addEventListener("change",function(){
+
+$("prod-foto-archivo").addEventListener("change",async function(){
   var f = this.files[0]; if(!f) return;
-  var r = new FileReader();
-  r.onload = function(e){
-    fotoDataUrl = e.target.result;
-    $("media-preview").innerHTML = '<img src="'+fotoDataUrl+'" alt="Vista previa">';
-    setStatus("✅ Foto cargada");
-  };
-  r.readAsDataURL(f);
+  $("media-preview").innerHTML = "<p>Comprimiendo foto… ⏳</p>";
+  fotoDataUrl = await comprimirFoto(f);
+  $("media-preview").innerHTML = '<img src="'+fotoDataUrl+'" alt="Vista previa">';
+  setStatus("✅ Foto lista (comprimida automáticamente)");
 });
+
 function cancelarEdicion(){
   editingId = null;
   $("product-form").reset();
@@ -380,6 +476,7 @@ function cancelarEdicion(){
   $("btn-cancelar-edicion").hidden = true;
   setStatus("");
 }
+
 function editarProducto(id){
   var p = products.find(function(x){ return x.id===id; });
   if(!p) return;
@@ -409,19 +506,25 @@ function editarProducto(id){
   }
   var aviso = $("editando-aviso");
   aviso.style.display = "block";
-  aviso.textContent = "✏️ Editando: " + p.nombre + " — modifica lo que quieras (incluido el descuento) y pulsa Guardar cambios.";
+  aviso.textContent = "✏️ Editando: " + p.nombre + " — modifica lo que quieras y pulsa Guardar cambios.";
   submitBtn().textContent = "💾 Guardar cambios";
   $("btn-cancelar-edicion").hidden = false;
   $("admin-panel").scrollIntoView({behavior:"smooth", block:"start"});
 }
+
 async function quitarDescuento(id){
   var p = products.find(function(x){ return x.id===id; });
   if(!p) return;
-  if(!confirm("¿Quitar el descuento del "+dtoOf(p)+"% de '"+p.nombre+"'? Volverá a su precio normal.")) return;
+  var descuentoAnterior = p.descuento || 0;
+  if(!confirm("¿Quitar el descuento del "+descuentoAnterior+"% de '"+p.nombre+"'? Volverá a su precio normal.")) return;
   try{
     await db.collection("productos").doc(id).update({ descuento: 0 });
+    mostrarDeshacer("Descuento quitado a: "+p.nombre, async function(){
+      await db.collection("productos").doc(id).update({ descuento: descuentoAnterior });
+    });
   }catch(e){ alert("Error al quitar el descuento: "+e.message); }
 }
+
 function leerFormulario(){
   return {
     nombre: $("prod-nombre").value.trim(),
@@ -434,19 +537,19 @@ function leerFormulario(){
     imageUrl: fotoDataUrl || ""
   };
 }
+
 async function guardarProducto(e){
   e.preventDefault();
   if(!isAdmin(auth.currentUser)){ alert("Inicia sesión primero"); return; }
-
   var d = leerFormulario();
   if(!d.nombre || isNaN(d.precio)){ setStatus("Escribe nombre y precio",true); return; }
   if(!editingId && !d.imageUrl && !d.videoUrl){ setStatus("Sube una foto o pon un video",true); return; }
-
   var boton = submitBtn();
   boton.disabled = true;
   setStatus("Guardando… ⏳");
-
   try{
+    var idGuardado = editingId || null;
+    var datosAnteriores = editingId ? products.find(function(x){ return x.id===editingId; }) : null;
     if(editingId){
       var payload = {
         nombre: d.nombre, precio: d.precio, descuento: d.descuento,
@@ -456,14 +559,22 @@ async function guardarProducto(e){
       if(d.imageUrl) payload.imageUrl = d.imageUrl;
       await db.collection("productos").doc(editingId).update(payload);
       setStatus("✅ ¡Producto actualizado con éxito!");
+      mostrarDeshacer("Producto editado: "+d.nombre, async function(){
+        await db.collection("productos").doc(editingId).update(datosAnteriores);
+      });
     }else{
-      await db.collection("productos").doc().set({
+      var refNuevo = db.collection("productos").doc();
+      idGuardado = refNuevo.id;
+      await refNuevo.set({
         nombre: d.nombre, precio: d.precio, descuento: d.descuento,
         categoria: d.categoria, descripcion: d.descripcion, referencia: d.referencia,
         imageUrl: d.imageUrl, videoUrl: d.videoUrl,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       setStatus("✅ ¡Producto publicado con éxito!");
+      mostrarDeshacer("Producto publicado: "+d.nombre, async function(){
+        await db.collection("productos").doc(idGuardado).delete();
+      });
     }
     cancelarEdicion();
   }catch(ex){
@@ -471,10 +582,20 @@ async function guardarProducto(e){
   }
   boton.disabled = false;
 }
+
 async function eliminarProducto(id){
+  var p = products.find(function(x){ return x.id===id; });
+  if(!p) return;
   if(!confirm("¿Eliminar este producto?")) return;
-  await db.collection("productos").doc(id).delete();
+  var datosProducto = {...p};
+  try{
+    await db.collection("productos").doc(id).delete();
+    mostrarDeshacer("Producto eliminado: "+p.nombre, async function(){
+      await db.collection("productos").doc(id).set(datosProducto);
+    });
+  }catch(e){ alert("Error: "+e.message); }
 }
+
 function renderProducts(){
   var q = $("search").value.toLowerCase().trim();
   var filtro = products.filter(function(p){
@@ -484,7 +605,6 @@ function renderProducts(){
     if(q && (p.nombre+" "+p.categoria+" "+(p.descripcion||"")).toLowerCase().indexOf(q) === -1) return false;
     return true;
   });
-
   $("products").innerHTML = filtro.length ? filtro.map(function(p){
     var d = dtoOf(p);
     var pf = precioFinal(p);
@@ -504,6 +624,7 @@ function renderProducts(){
     '</article>';
   }).join("") : '<div class="empty">'+(activeCat===OFERTAS ? "Aún no hay ofertas disponibles 💔" : "No hay productos en esta categoría 💔")+'</div>';
 }
+
 function renderAdminProducts(){
   if(!isAdmin(auth.currentUser)) return;
   $("admin-products").innerHTML = products.length ? products.map(function(p){
@@ -523,6 +644,7 @@ function renderAdminProducts(){
     '</div>';
   }).join("") : '<p class="status">No hay productos aún. ¡Agrega el primero arriba! 👆</p>';
 }
+
 function addToCart(id){
   var p = products.find(function(x){ return x.id===id; }); if(!p) return;
   var pf = precioFinal(p);
@@ -535,6 +657,7 @@ function addToCart(id){
   renderCart();
   $("cart-drawer").classList.add("open");
 }
+
 function renderCart(){
   $("count").textContent = cart.reduce(function(s,p){ return s+p.qty; },0);
   $("cart-items").innerHTML = cart.length ? cart.map(function(p){
@@ -545,6 +668,7 @@ function renderCart(){
   }).join("") : "<p>Tu carrito está vacío 🛍️</p>";
   $("cart-total").textContent = "Total: " + money(cart.reduce(function(s,p){ return s+p.precio*p.qty; },0));
 }
+
 function checkout(){
   if(!cart.length) return alert("Agrega productos primero");
   var msg = "Hola STARFUXXIA ✨ Quiero hacer un pedido:\n\n" +
@@ -552,12 +676,18 @@ function checkout(){
     "\n━━━━━━━━━━━━━━━\nTOTAL: "+money(cart.reduce(function(s,p){ return s+p.precio*p.qty; },0))+"\n\n¡Gracias! 💗";
   window.open("https://wa.me/573013412415?text="+encodeURIComponent(msg),"_blank");
 }
+
+// Eventos
 $("btn-google").onclick = iniciarSesionGoogle;
 $("btn-cerrar").onclick = cerrarSesion;
 $("product-form").onsubmit = guardarProducto;
 $("btn-cancelar-edicion").onclick = cancelarEdicion;
 $("search").oninput = renderProducts;
 $("btn-guardar-categoria").onclick = agregarCategoria;
+$("btn-backup").onclick = descargarRespaldo;
+$("undo-btn").onclick = function(){ if(undoAction){ undoAction(); ocultarDeshacer(); } };
+$("dismiss-undo").onclick = ocultarDeshacer;
+
 $("products").onclick = function(e){
   var b = e.target.closest("[data-add]"); if(b) addToCart(b.dataset.add);
 };
@@ -576,30 +706,38 @@ $("cart-drawer").onclick = function(e){
   var b = e.target.closest("[data-remove]"); if(b){ cart=cart.filter(function(x){ return x.id!==b.dataset.remove; }); renderCart(); }
 };
 $("checkout").onclick = checkout;
+
+// Inicializar
 firebase.initializeApp(firebaseConfig);
 auth = firebase.auth();
 db = firebase.firestore();
-auth.onAuthStateChanged(function(user){
-  $("btn-google").hidden = !!user;
-  $("btn-cerrar").hidden = !user;
-  $("usuario-nombre").textContent = user ? "👤 "+user.email : "";
-  $("admin-panel").style.display = user ? "block" : "none";
-  if(!user){ cancelarEdicion(); }
 
-  if(user){
-    db.collection("categorias").orderBy("nombre").onSnapshot(function(snap){
+// Cargar productos y categorías PARA TODOS los visitantes (sin esperar login)
+function iniciarCargaPublica(){
+  $("products").innerHTML = '<div class="empty">Cargando productos…</div>';
+  
+  db.collection("categorias").orderBy("nombre").onSnapshot(
+    function(snap){
       categorias = snap.docs.map(function(d){ return {id:d.id, nombre:d.data().nombre}; });
       renderCategorias();
-    });
-    db.collection("productos").orderBy("createdAt","desc").onSnapshot(function(snap){
+    },
+    function(err){
+      $("products").innerHTML = '<div class="empty" style="color:#b42332">Error cargando categorías: '+err.message+'<br><button class="retry-btn" onclick="location.reload()">🔄 Reintentar</button></div>';
+    }
+  );
+
+  db.collection("productos").orderBy("createdAt","desc").onSnapshot(
+    function(snap){
       products = snap.docs.map(function(d){ var x=d.data(); x.id=d.id; return x; });
       renderProducts();
       renderAdminProducts();
       refrescarContadorOfertas();
-    });
-  }
-});
-})();
-</script>
-</body>
-</html>
+    },
+    function(err){
+      $("products").innerHTML = '<div class="empty" style="color:#b42332">No se pudieron cargar los productos:<br><strong>'+err.message+'</strong><br><br>Verifica las reglas de Firestore ✅<br><button class="retry-btn" onclick="location.reload()">🔄 Reintentar</button></div>';
+    }
+  );
+}
+
+// Cambios de sesión
+auth.on
